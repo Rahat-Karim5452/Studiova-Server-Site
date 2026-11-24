@@ -23,3 +23,8 @@ app.use(cors());
 app.use(express.json());
 
 const mongoClient = await connectToMongoDB();
+
+//Database NEW collection names
+const db = mongoClient.db("studiospace_db");
+const spaceCollection = db.collection("creative_spaces"); // was: studios
+const reservationCollection = db.collection("reservations"); // was: bookings
