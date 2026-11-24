@@ -28,3 +28,19 @@ const mongoClient = await connectToMongoDB();
 const db = mongoClient.db("studiospace_db");
 const spaceCollection = db.collection("creative_spaces"); // was: studios
 const reservationCollection = db.collection("reservations"); // was: bookings
+
+app.get("/", (req, res) => {
+  res.send({ message: "Server is running fine!" });
+});
+
+// If anything above fails, send a clean message instead of a stack trace
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).send({ msg: "Server Error!" });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running at ${PORT}`);
+});
+
+export default app;
