@@ -24,12 +24,74 @@ app.use(express.json());
 
 const mongoClient = await connectToMongoDB();
 
-//Database NEW collection names
+// Database + NEW collection names
 const db = mongoClient.db("studiospace_db");
 const spaceCollection = db.collection("creative_spaces"); // was: studios
 const reservationCollection = db.collection("reservations"); // was: bookings
 
-// ---------------- Studios ----------------
+// JWT security
+
+// BetterAuth
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.CLIENT_URL}/api/auth/jwks`),
+);
+
+const verifyToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).send({ msg: "Unauthorized!" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).send({ msg: "Unauthorized!" });
+  }
+
+  try {
+    const { payload } = await jwtVerify(token, JWKS);
+    req.user = payload;
+    next();
+  } catch (error) {
+    return res.status(401).send({ msg: "Unauthorized!" });
+  }
+};
+
+const verifyEmail = (req, res, next) => {
+  if (req.params.email !== req.user.email) {
+    return res.status(403).send({ msg: "Forbidden!" });
+  }
+  next();
+};
+
+const isValidId = (id) => typeof id === "string" && ObjectId.isValid(id);
+const isDate = (value) =>
+  typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+const isTime = (value) =>
+  typeof value === "string" && /^([01]\d|2[0-3]):00$/.test(value);
+
+const getStudioData = (body) => ({
+  title: String(body.title || "").trim(),
+  category: String(body.category || "").trim(),
+  hourlyRate: Number(body.hourlyRate),
+  securityDeposit: Number(body.securityDeposit) || 0,
+  maxCapacity: Number(body.maxCapacity),
+  location: String(body.location || "").trim(),
+  imageUrl: String(body.imageUrl || "").trim(),
+  amenities: Array.isArray(body.amenities) ? body.amenities.map(String) : [],
+  overview: String(body.overview || "").trim(),
+});
+
+const isValidStudio = (studio) =>
+  studio.title &&
+  studio.category &&
+  studio.location &&
+  studio.overview &&
+  studio.imageUrl.startsWith("https://") &&
+  studio.hourlyRate > 0 &&
+  studio.maxCapacity > 0 &&
+  studio.securityDeposit >= 0;
 
 app.post("/add-studio", verifyToken, async (req, res) => {
   const data = getStudioData(req.body);
@@ -43,7 +105,6 @@ app.post("/add-studio", verifyToken, async (req, res) => {
   const studio = {
     ...data,
     gallery: [],
-    // the host is always the logged in user from the token
     ownerEmail: req.user.email,
     ownerName: req.user.name,
     ownerPhoto: req.user.image || "",
@@ -65,7 +126,6 @@ app.get("/studios", async (req, res) => {
   }
 
   if (search) {
-    // escape special characters so the search text is not used as a pattern
     const text = String(search).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     query.$or = [
       { title: { $regex: text, $options: "i" } },
@@ -207,8 +267,6 @@ app.post("/booking", verifyToken, async (req, res) => {
     return res.status(404).send({ msg: "Studio not found" });
   }
 
-  // Double-booking prevention:
-  // is there a CONFIRMED booking for this studio and date whose time overlaps?
   const clash = await reservationCollection.findOne({
     studioId,
     date,
@@ -223,7 +281,6 @@ app.post("/booking", verifyToken, async (req, res) => {
     });
   }
 
-  // "13:00" - "10:00" = 3 hours
   const hours = Number(endTime.slice(0, 2)) - Number(startTime.slice(0, 2));
 
   const booking = {
