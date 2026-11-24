@@ -1,0 +1,211 @@
+[
+  {
+    "title": "Northlight Cyc Studio",
+    "category": "Photo Studio",
+    "hourlyRate": 85,
+    "securityDeposit": 200,
+    "maxCapacity": 12,
+    "location": "Greenpoint, Brooklyn",
+    "imageUrl": "https://images.pexels.com/photos/17094501/pexels-photo-17094501.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    "gallery": [
+      "https://images.pexels.com/photos/20313879/pexels-photo-20313879.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+      "https://images.pexels.com/photos/7205296/pexels-photo-7205296.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200"
+    ],
+    "amenities": [
+      "Cyc wall",
+      "Strobe lighting",
+      "Blackout",
+      "Makeup room",
+      "Wi-Fi"
+    ],
+    "overview": "A 1,400 sq ft daylight studio built around a 14ft infinity cove that is repainted every week. Strobe kits, C-stands and a full set of apple boxes are included with every booking.",
+    "rating": 4.9,
+    "ownerName": "Ava Bennett",
+    "ownerEmail": "ava@studiospace.dev",
+    "ownerPhoto": "",
+    "reviews": [
+      {
+        "name": "Marcus Oduya",
+        "rating": 5,
+        "comment": "Spotless room and the host had everything ready when we arrived."
+      },
+      {
+        "name": "Priya Raman",
+        "rating": 5,
+        "comment": "Easy to load in and exactly as described. We will book again."
+      }
+    ],
+    "createdAt": { "$date": "2026-11-24T08:00:00.000Z" }
+  },
+  {
+    "title": "Helios Sound Stage",
+    "category": "Film Stage",
+    "hourlyRate": 240,
+    "securityDeposit": 500,
+    "maxCapacity": 40,
+    "location": "Arts District, Los Angeles",
+    "imageUrl": "https://images.pexels.com/photos/8089249/pexels-photo-8089249.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    "gallery": [
+      "https://images.pexels.com/photos/7865064/pexels-photo-7865064.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+      "https://images.pexels.com/photos/7513427/pexels-photo-7513427.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200"
+    ],
+    "amenities": [
+      "Drive-in access",
+      "Green screen",
+      "Lighting grid",
+      "Makeup room",
+      "Parking"
+    ],
+    "overview": "A 4,200 sq ft sound stage with a 22ft lighting grid, a cyclorama and drive-in access for a 5-tonne truck. A production office and a green room are attached.",
+    "rating": 4.9,
+    "ownerName": "Ava Bennett",
+    "ownerEmail": "ava@studiospace.dev",
+    "ownerPhoto": "",
+    "reviews": [
+      {
+        "name": "Marcus Oduya",
+        "rating": 5,
+        "comment": "Spotless room and the host had everything ready when we arrived."
+      },
+      {
+        "name": "Priya Raman",
+        "rating": 5,
+        "comment": "Easy to load in and exactly as described. We will book again."
+      }
+    ],
+    "createdAt": { "$date": "2026-11-23T08:00:00.000Z" }
+  },
+  {
+    "title": "The Long Take Podcast Lounge",
+    "category": "Podcast Lounge",
+    "hourlyRate": 48,
+    "securityDeposit": 80,
+    "maxCapacity": 5,
+    "location": "East Austin, Texas",
+    "imageUrl": "https://images.pexels.com/photos/7383469/pexels-photo-7383469.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    "gallery": [
+      "https://images.pexels.com/photos/32007691/pexels-photo-32007691.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+      "https://images.pexels.com/photos/7598553/pexels-photo-7598553.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200"
+    ],
+    "amenities": [
+      "Broadcast mics",
+      "Acoustic treatment",
+      "Live streaming",
+      "Wi-Fi"
+    ],
+    "overview": "A treated podcast lounge with four broadcast microphones and a mixing desk that is ready to record. Multi-camera video capture is available on request.",
+    "rating": 4.8,
+    "ownerName": "Ava Bennett",
+    "ownerEmail": "ava@studiospace.dev",
+    "ownerPhoto": "",
+    "reviews": [
+      {
+        "name": "Marcus Oduya",
+        "rating": 5,
+        "comment": "Spotless room and the host had everything ready when we arrived."
+      },
+      {
+        "name": "Priya Raman",
+        "rating": 5,
+        "comment": "Easy to load in and exactly as described. We will book again."
+      }
+    ],
+    "createdAt": { "$date": "2026-11-22T08:00:00.000Z" }
+  },
+  {
+    "title": "Halcyon Console Room",
+    "category": "Music Suite",
+    "hourlyRate": 120,
+    "securityDeposit": 300,
+    "maxCapacity": 8,
+    "location": "Wicker Park, Chicago",
+    "imageUrl": "https://images.pexels.com/photos/8197361/pexels-photo-8197361.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    "gallery": [
+      "https://images.pexels.com/photos/36936571/pexels-photo-36936571.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+      "https://images.pexels.com/photos/744323/pexels-photo-744323.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200"
+    ],
+    "amenities": ["Full backline", "Recording engineer", "Iso booth", "Wi-Fi"],
+    "overview": "A 32-channel console room with a tuned live floor, a two-person iso booth and house instruments. A recording engineer can be added to any session.",
+    "rating": 4.8,
+    "ownerName": "Ava Bennett",
+    "ownerEmail": "ava@studiospace.dev",
+    "ownerPhoto": "",
+    "reviews": [
+      {
+        "name": "Marcus Oduya",
+        "rating": 5,
+        "comment": "Spotless room and the host had everything ready when we arrived."
+      },
+      {
+        "name": "Priya Raman",
+        "rating": 5,
+        "comment": "Easy to load in and exactly as described. We will book again."
+      }
+    ],
+    "createdAt": { "$date": "2026-11-21T08:00:00.000Z" }
+  },
+  {
+    "title": "Kiln & Canvas Workshop",
+    "category": "Workshop",
+    "hourlyRate": 42,
+    "securityDeposit": 60,
+    "maxCapacity": 14,
+    "location": "Kreuzberg, Berlin",
+    "imageUrl": "https://images.pexels.com/photos/4348298/pexels-photo-4348298.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    "gallery": [
+      "https://images.pexels.com/photos/36764941/pexels-photo-36764941.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+      "https://images.pexels.com/photos/9283867/pexels-photo-9283867.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200"
+    ],
+    "amenities": ["Natural light", "Wi-Fi", "Parking"],
+    "overview": "A skylit workshop with six pottery wheels, a glazing bench and drying racks. Soft north light all day makes it a good room for craft and process shoots.",
+    "rating": 4.7,
+    "ownerName": "Ava Bennett",
+    "ownerEmail": "ava@studiospace.dev",
+    "ownerPhoto": "",
+    "reviews": [
+      {
+        "name": "Marcus Oduya",
+        "rating": 5,
+        "comment": "Spotless room and the host had everything ready when we arrived."
+      },
+      {
+        "name": "Priya Raman",
+        "rating": 5,
+        "comment": "Easy to load in and exactly as described. We will book again."
+      }
+    ],
+    "createdAt": { "$date": "2026-11-20T08:00:00.000Z" }
+  },
+  {
+    "title": "Daylight Loft Studio B",
+    "category": "Photo Studio",
+    "hourlyRate": 70,
+    "securityDeposit": 120,
+    "maxCapacity": 10,
+    "location": "Bushwick, Brooklyn",
+    "imageUrl": "https://images.pexels.com/photos/20313879/pexels-photo-20313879.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+    "gallery": [
+      "https://images.pexels.com/photos/7206218/pexels-photo-7206218.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200",
+      "https://images.pexels.com/photos/7318661/pexels-photo-7318661.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=800&w=1200"
+    ],
+    "amenities": ["Natural light", "Props", "Makeup room", "Wi-Fi"],
+    "overview": "A bright corner loft with seven large windows, hardwood floors and whitewashed brick. A strong location for editorial and brand photography.",
+    "rating": 4.6,
+    "ownerName": "Ava Bennett",
+    "ownerEmail": "ava@studiospace.dev",
+    "ownerPhoto": "",
+    "reviews": [
+      {
+        "name": "Marcus Oduya",
+        "rating": 5,
+        "comment": "Spotless room and the host had everything ready when we arrived."
+      },
+      {
+        "name": "Priya Raman",
+        "rating": 5,
+        "comment": "Easy to load in and exactly as described. We will book again."
+      }
+    ],
+    "createdAt": { "$date": "2026-11-19T08:00:00.000Z" }
+  }
+]
