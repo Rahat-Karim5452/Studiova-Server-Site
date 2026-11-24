@@ -405,8 +405,11 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).send({ msg: "Server Error!" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running at ${PORT}`);
-});
+// Vercel imports this module as a serverless handler; only bind a port locally.
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server is running at ${PORT}`);
+  });
+}
 
 export default app;
