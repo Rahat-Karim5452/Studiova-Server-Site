@@ -170,6 +170,174 @@ app.delete("/studio/:id", verifyToken, async (req, res) => {
   res.json(result);
 });
 
+// ---------------- Bookings (stored in "reservations") ----------------
+
+app.post("/booking", verifyToken, async (req, res) => {
+  const { studioId, date, startTime, endTime } = req.body;
+
+  if (
+    !isValidId(studioId) ||
+    !isDate(date) ||
+    !isTime(startTime) ||
+    !isTime(endTime)
+  ) {
+    return res.status(400).send({ msg: "Studio, date and time are required" });
+  }
+
+  if (startTime >= endTime) {
+    return res.status(400).send({ msg: "End time must be after start time" });
+  }
+
+  // one day of tolerance, because the user can be in a different time zone
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+
+  if (date < yesterday) {
+    return res
+      .status(400)
+      .send({ msg: "Please choose today or a future date" });
+  }
+
+  const studio = await spaceCollection.findOne({
+    _id: new ObjectId(studioId),
+  });
+
+  if (!studio) {
+    return res.status(404).send({ msg: "Studio not found" });
+  }
+
+  // Double-booking prevention:
+  // is there a CONFIRMED booking for this studio and date whose time overlaps?
+  const clash = await reservationCollection.findOne({
+    studioId,
+    date,
+    status: "Confirmed",
+    startTime: { $lt: endTime },
+    endTime: { $gt: startTime },
+  });
+
+  if (clash) {
+    return res.status(409).send({
+      msg: `This time overlaps a confirmed booking (${clash.startTime} - ${clash.endTime}). Please choose another slot.`,
+    });
+  }
+
+  // "13:00" - "10:00" = 3 hours
+  const hours = Number(endTime.slice(0, 2)) - Number(startTime.slice(0, 2));
+
+  const booking = {
+    studioId,
+    studioTitle: studio.title,
+    studioImage: studio.imageUrl,
+    location: studio.location,
+    hostEmail: studio.ownerEmail,
+    email: req.user.email,
+    userName: req.user.name,
+    date,
+    startTime,
+    endTime,
+    hours,
+    totalPrice: hours * studio.hourlyRate,
+    status: "Pending",
+    createdAt: new Date(),
+  };
+
+  const result = await reservationCollection.insertOne(booking);
+  res.send(result);
+});
+
+app.get("/my-bookings/:email", verifyToken, verifyEmail, async (req, res) => {
+  const { email } = req.params;
+  const result = await reservationCollection
+    .find({ email: email })
+    .sort({ createdAt: -1 })
+    .toArray();
+  res.send(result);
+});
+
+// The creator cancels their own pending booking
+app.patch("/my-bookings/:id/cancel", verifyToken, async (req, res) => {
+  const { id } = req.params;
+
+  if (!isValidId(id)) {
+    return res.status(400).send({ msg: "Invalid id" });
+  }
+
+  const result = await reservationCollection.updateOne(
+    { _id: new ObjectId(id), email: req.user.email, status: "Pending" },
+    { $set: { status: "Cancelled" } },
+  );
+
+  if (result.matchedCount === 0) {
+    return res
+      .status(400)
+      .send({ msg: "Only your own pending bookings can be cancelled" });
+  }
+
+  res.send(result);
+});
+
+// Booking requests that other people sent for my studios
+app.get("/host-bookings/:email", verifyToken, verifyEmail, async (req, res) => {
+  const { email } = req.params;
+  const result = await reservationCollection
+    .find({ hostEmail: email })
+    .sort({ createdAt: -1 })
+    .toArray();
+  res.send(result);
+});
+
+// The host confirms, completes or declines a booking
+app.patch("/booking/:id/status", verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (
+    !isValidId(id) ||
+    !["Confirmed", "Completed", "Cancelled"].includes(status)
+  ) {
+    return res.status(400).send({ msg: "Invalid request" });
+  }
+
+  const booking = await reservationCollection.findOne({
+    _id: new ObjectId(id),
+  });
+
+  if (!booking) {
+    return res.status(404).send({ msg: "Booking not found" });
+  }
+
+  // only the host of the studio can change the status
+  if (booking.hostEmail !== req.user.email) {
+    return res.status(403).send({ msg: "Forbidden!" });
+  }
+
+  // check again before confirming, so two bookings never share a time slot
+  if (status === "Confirmed") {
+    const clash = await reservationCollection.findOne({
+      _id: { $ne: booking._id },
+      studioId: booking.studioId,
+      date: booking.date,
+      status: "Confirmed",
+      startTime: { $lt: booking.endTime },
+      endTime: { $gt: booking.startTime },
+    });
+
+    if (clash) {
+      return res.status(409).send({
+        msg: "Another confirmed booking already uses this time slot",
+      });
+    }
+  }
+
+  const result = await reservationCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { status } },
+  );
+  res.send(result);
+});
+
 app.get("/", (req, res) => {
   res.send({ message: "Server is running fine!" });
 });
