@@ -24,14 +24,13 @@ app.use(express.json());
 
 const mongoClient = await connectToMongoDB();
 
-// Database + NEW collection names
+// Database + collection names
 const db = mongoClient.db("studiospace_db");
-const spaceCollection = db.collection("creative_spaces"); // was: studios
-const reservationCollection = db.collection("reservations"); // was: bookings
+const spaceCollection = db.collection("creative_spaces"); // studios
+const reservationCollection = db.collection("reservations"); // bookings
 
-// JWT security
+// ---------------- JWT security (BetterAuth) ----------------
 
-// BetterAuth
 const JWKS = createRemoteJWKSet(
   new URL(`${process.env.CLIENT_URL}/api/auth/jwks`),
 );
@@ -65,6 +64,8 @@ const verifyEmail = (req, res, next) => {
   next();
 };
 
+// ---------------- Helpers ----------------
+
 const isValidId = (id) => typeof id === "string" && ObjectId.isValid(id);
 const isDate = (value) =>
   typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -92,6 +93,8 @@ const isValidStudio = (studio) =>
   studio.hourlyRate > 0 &&
   studio.maxCapacity > 0 &&
   studio.securityDeposit >= 0;
+
+// ---------------- Studios (stored in "creative_spaces") ----------------
 
 app.post("/add-studio", verifyToken, async (req, res) => {
   const data = getStudioData(req.body);
@@ -189,6 +192,7 @@ app.patch("/studio/:id", verifyToken, async (req, res) => {
     return res.status(404).send({ msg: "Studio not found" });
   }
 
+  // only the host of this studio can update it
   if (studio.ownerEmail !== req.user.email) {
     return res.status(403).send({ msg: "Forbidden!" });
   }
@@ -221,7 +225,6 @@ app.delete("/studio/:id", verifyToken, async (req, res) => {
     return res.status(404).send({ msg: "Studio not found" });
   }
 
-  // only the host of this studio can delete it
   if (studio.ownerEmail !== req.user.email) {
     return res.status(403).send({ msg: "Forbidden!" });
   }
@@ -230,7 +233,7 @@ app.delete("/studio/:id", verifyToken, async (req, res) => {
   res.json(result);
 });
 
-// ---------------- Bookings (stored in "reservations") ----------------
+// Bookings stored in reservations
 
 app.post("/booking", verifyToken, async (req, res) => {
   const { studioId, date, startTime, endTime } = req.body;
@@ -248,7 +251,6 @@ app.post("/booking", verifyToken, async (req, res) => {
     return res.status(400).send({ msg: "End time must be after start time" });
   }
 
-  // one day of tolerance, because the user can be in a different time zone
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
@@ -267,6 +269,10 @@ app.post("/booking", verifyToken, async (req, res) => {
     return res.status(404).send({ msg: "Studio not found" });
   }
 
+  if (studio.ownerEmail === req.user.email) {
+    return res.status(400).send({ msg: "You cannot book your own studio" });
+  }
+
   const clash = await reservationCollection.findOne({
     studioId,
     date,
@@ -278,6 +284,22 @@ app.post("/booking", verifyToken, async (req, res) => {
   if (clash) {
     return res.status(409).send({
       msg: `This time overlaps a confirmed booking (${clash.startTime} - ${clash.endTime}). Please choose another slot.`,
+    });
+  }
+
+  // the same user cannot send the same slot twice
+  const duplicate = await reservationCollection.findOne({
+    studioId,
+    email: req.user.email,
+    date,
+    status: { $in: ["Pending", "Confirmed"] },
+    startTime: { $lt: endTime },
+    endTime: { $gt: startTime },
+  });
+
+  if (duplicate) {
+    return res.status(409).send({
+      msg: "You already have a booking request for this time slot",
     });
   }
 
@@ -313,7 +335,6 @@ app.get("/my-bookings/:email", verifyToken, verifyEmail, async (req, res) => {
   res.send(result);
 });
 
-// The creator cancels their own pending booking
 app.patch("/my-bookings/:id/cancel", verifyToken, async (req, res) => {
   const { id } = req.params;
 
@@ -335,7 +356,6 @@ app.patch("/my-bookings/:id/cancel", verifyToken, async (req, res) => {
   res.send(result);
 });
 
-// Booking requests that other people sent for my studios
 app.get("/host-bookings/:email", verifyToken, verifyEmail, async (req, res) => {
   const { email } = req.params;
   const result = await reservationCollection
@@ -345,7 +365,6 @@ app.get("/host-bookings/:email", verifyToken, verifyEmail, async (req, res) => {
   res.send(result);
 });
 
-// The host confirms, completes or declines a booking
 app.patch("/booking/:id/status", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -365,12 +384,21 @@ app.patch("/booking/:id/status", verifyToken, async (req, res) => {
     return res.status(404).send({ msg: "Booking not found" });
   }
 
-  // only the host of the studio can change the status
   if (booking.hostEmail !== req.user.email) {
     return res.status(403).send({ msg: "Forbidden!" });
   }
 
-  // check again before confirming, so two bookings never share a time slot
+  const allowedNext = {
+    Pending: ["Confirmed", "Cancelled"],
+    Confirmed: ["Completed", "Cancelled"],
+  };
+
+  if (!allowedNext[booking.status]?.includes(status)) {
+    return res.status(400).send({
+      msg: `A ${booking.status} booking cannot become ${status}`,
+    });
+  }
+
   if (status === "Confirmed") {
     const clash = await reservationCollection.findOne({
       _id: { $ne: booking._id },
@@ -399,13 +427,11 @@ app.get("/", (req, res) => {
   res.send({ message: "Server is running fine!" });
 });
 
-// If anything above fails, send a clean message instead of a stack trace
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(err.status || 500).send({ msg: "Server Error!" });
 });
 
-// Vercel imports this module as a serverless handler; only bind a port locally.
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Server is running at ${PORT}`);
